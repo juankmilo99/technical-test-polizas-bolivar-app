@@ -140,11 +140,11 @@ class PolizasApiApplicationTests {
     }
 
     @Test
-    @DisplayName("Mock CORE: POST /core-mock/event responds 200 and logs event")
+    @DisplayName("Mock CORE: POST /api/v1/core-mock/event responds 200 and logs event")
     void testCoreMockEndpoint() throws Exception {
         String jsonRequest = "{\"event\": \"POLICY_UPDATE\", \"policyId\": 555}";
 
-        mockMvc.perform(post("/core-mock/event")
+        mockMvc.perform(post("/api/v1/core-mock/event")
                         .header("x-api-key", "123456")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))

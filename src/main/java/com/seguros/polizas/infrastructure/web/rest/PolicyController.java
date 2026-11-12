@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * Inbound REST controller adapter for Policy management operations.
  */
 @RestController
-@RequestMapping({"/api/v1/policies", "/policies", "/api/v1/polizas", "/polizas"})
+@RequestMapping("/api/v1/policies")
 @Tag(name = "1. Policies", description = "Operations for rental policy management, renewals and cancellations")
 public class PolicyController {
 
@@ -53,14 +53,9 @@ public class PolicyController {
     @GetMapping
     public ResponseEntity<List<PolicyResponse>> list(
             @Parameter(description = "Policy type") @RequestParam(required = false) PolicyType type,
-            @Parameter(description = "Legacy type param") @RequestParam(required = false, name = "tipo") PolicyType legacyType,
-            @Parameter(description = "Policy status") @RequestParam(required = false) PolicyStatus status,
-            @Parameter(description = "Legacy status param") @RequestParam(required = false, name = "estado") PolicyStatus legacyStatus) {
+            @Parameter(description = "Policy status") @RequestParam(required = false) PolicyStatus status) {
 
-        PolicyType resolvedType = (type != null) ? type : legacyType;
-        PolicyStatus resolvedStatus = (status != null) ? status : legacyStatus;
-
-        List<PolicyResponse> result = policyQuery.list(resolvedType, resolvedStatus).stream()
+        List<PolicyResponse> result = policyQuery.list(type, status).stream()
                 .map(PolicyResponse::fromEntity)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(result);
@@ -78,7 +73,7 @@ public class PolicyController {
     }
 
     @Operation(summary = "List risks of a policy", description = "Retrieve all property risks associated with the policy")
-    @GetMapping({"/{id}/risks", "/{id}/riesgos"})
+    @GetMapping("/{id}/risks")
     public ResponseEntity<List<RiskResponse>> listRisks(@PathVariable Long id) {
         List<RiskResponse> risks = policyQuery.listRisks(id).stream()
                 .map(RiskResponse::fromEntity)
@@ -125,7 +120,7 @@ public class PolicyController {
             @ApiResponse(responseCode = "404", description = "Policy not found"),
             @ApiResponse(responseCode = "422", description = "Business rule violation (e.g. policy is CANCELLED)")
     })
-    @PostMapping({"/{id}/renew", "/{id}/renovar"})
+    @PostMapping("/{id}/renew")
     public ResponseEntity<PolicyResponse> renew(
             @PathVariable Long id,
             @Valid @RequestBody RenewalRequest request) {
@@ -139,7 +134,7 @@ public class PolicyController {
             @ApiResponse(responseCode = "200", description = "Policy and all risks successfully cancelled"),
             @ApiResponse(responseCode = "404", description = "Policy not found")
     })
-    @PostMapping({"/{id}/cancel", "/{id}/cancelar"})
+    @PostMapping("/{id}/cancel")
     public ResponseEntity<PolicyResponse> cancel(@PathVariable Long id) {
         Policy cancelled = policyCommandHandler.cancel(new CancelPolicyCommand(id));
         return ResponseEntity.ok(PolicyResponse.fromEntity(cancelled));
@@ -151,7 +146,7 @@ public class PolicyController {
             @ApiResponse(responseCode = "404", description = "Policy not found"),
             @ApiResponse(responseCode = "422", description = "Business rule violation")
     })
-    @PostMapping({"/{id}/risks", "/{id}/riesgos"})
+    @PostMapping("/{id}/risks")
     public ResponseEntity<RiskResponse> addRisk(
             @PathVariable Long id,
             @Valid @RequestBody RiskRequest request) {

@@ -270,7 +270,7 @@ curl -X POST "http://localhost:8080/api/v1/core-mock/evento" \
      -d '{"evento": "ACTUALIZACION", "polizaId": 555}'
 ```
 
-> También puedes usar la colección [`polizas.http`](polizas.http) (REST Client / IntelliJ) o el script [`probar-api.ps1`](probar-api.ps1).
+> También puedes usar la colección [`policies.http`](policies.http) (REST Client / IntelliJ) o el script [`test-business-rules.ps1`](test-business-rules.ps1).
 
 ---
 

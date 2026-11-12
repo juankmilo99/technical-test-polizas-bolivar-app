@@ -20,14 +20,14 @@ import java.util.Map;
  * Mock endpoint simulating the legacy WebLogic CORE service.
  */
 @RestController
-@RequestMapping({"/core-mock", "/api/v1/core-mock"})
+@RequestMapping("/api/v1/core-mock")
 @Tag(name = "3. CORE Mock", description = "Mock simulating legacy WebLogic insurance system event reception")
 public class CoreMockController {
 
     private static final Logger log = LoggerFactory.getLogger(CoreMockController.class);
 
     @Operation(summary = "Receive event mock", description = "Receives business events emitted by the policy management service")
-    @PostMapping({"/event", "/evento"})
+    @PostMapping("/event")
     public ResponseEntity<Map<String, Object>> receiveEvent(@Valid @RequestBody CoreEventRequest request) {
         log.info("[CORE-MOCK] >> Event received from modern policy service: event='{}', policyId={}",
                 request.getEvent(), request.getPolicyId());

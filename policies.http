@@ -1,0 +1,142 @@
+### =========================================================================
+### HTTP TEST COLLECTION - POLICY MANAGEMENT API (MODULE 2)
+### Compatible with REST Client (VS Code), IntelliJ HTTP Client and Postman
+### =========================================================================
+
+@baseUrl = http://localhost:8080
+@apiKey = 123456
+
+### 1. Security: Access without API Key (must return 401 Unauthorized)
+GET {{baseUrl}}/api/v1/policies
+
+###
+
+### 2. Security: Access with invalid API Key (must return 401 Unauthorized)
+GET {{baseUrl}}/api/v1/policies
+x-api-key: invalid-key
+
+###
+
+### 3. List all preloaded policies (must return 200 OK with array of policies)
+GET {{baseUrl}}/api/v1/policies
+x-api-key: {{apiKey}}
+
+###
+
+### 4. Filter policies by Type and Status (Individual, Active)
+GET {{baseUrl}}/api/v1/policies?type=INDIVIDUAL&status=VIGENTE
+x-api-key: {{apiKey}}
+
+###
+
+### 5. List risks of Policy 1 (Individual)
+GET {{baseUrl}}/api/v1/policies/1/risks
+x-api-key: {{apiKey}}
+
+###
+
+### 6. List risks of Policy 2 (Collective)
+GET {{baseUrl}}/api/v1/policies/2/risks
+x-api-key: {{apiKey}}
+
+###
+
+### 6B. Get Policy 4 (Collective, already renewed, 2 active risks)
+GET {{baseUrl}}/api/v1/policies/4
+x-api-key: {{apiKey}}
+
+###
+
+### 6C. Get Policy 5 (Individual, 24 months, monthly rent $3,800,000)
+GET {{baseUrl}}/api/v1/policies/5
+x-api-key: {{apiKey}}
+
+###
+
+### 6D. Get Policy 6 (Collective, cancelled, cancelled risks)
+GET {{baseUrl}}/api/v1/policies/6
+x-api-key: {{apiKey}}
+
+###
+
+### 7. Renew Policy 1 applying IPC (+5.10%)
+# - Increases monthly rent and premium
+# - State transitions to RENOVADA
+# - Publishes domain event to CORE
+POST {{baseUrl}}/api/v1/policies/1/renew
+x-api-key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "ipc": 5.10
+}
+
+###
+
+### 8. Business rule: Try to renew CANCELLED Policy 3 (must return 422 Unprocessable Entity)
+POST {{baseUrl}}/api/v1/policies/3/renew
+x-api-key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "ipc": 5.10
+}
+
+###
+
+### 9. Business rule: Try to add risk to INDIVIDUAL Policy 1 (must return 422)
+POST {{baseUrl}}/api/v1/policies/1/risks
+x-api-key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "propertyAddress": "Carrera 15 # 90-10 Apt 402",
+  "city": "Bogota",
+  "insuredName": "Not Allowed Tenant",
+  "insuredAmount": 1500000.00
+}
+
+###
+
+### 10. Add risk to COLLECTIVE Policy 2 (must return 201 Created)
+POST {{baseUrl}}/api/v1/policies/2/risks
+x-api-key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "propertyAddress": "Carrera 7 # 71-21 Torre A Of 801",
+  "city": "Bogota",
+  "insuredName": "New Tenant Company SAS",
+  "insuredAmount": 3200000.00
+}
+
+###
+
+### 11. Cancel individual Risk (Risk ID 2)
+POST {{baseUrl}}/api/v1/risks/2/cancel
+x-api-key: {{apiKey}}
+
+###
+
+### 12. Business rule: Cancel Policy 2 (cancels the policy and ALL its risks in cascade)
+POST {{baseUrl}}/api/v1/policies/2/cancel
+x-api-key: {{apiKey}}
+
+###
+
+### 13. Verify risks of Policy 2 are CANCELLED after cascade
+GET {{baseUrl}}/api/v1/policies/2/risks
+x-api-key: {{apiKey}}
+
+###
+
+### 14. Mock CORE: Log event into the legacy system
+POST {{baseUrl}}/api/v1/core-mock/event
+x-api-key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "event": "MANUAL_UPDATE",
+  "policyId": 555
+}
+

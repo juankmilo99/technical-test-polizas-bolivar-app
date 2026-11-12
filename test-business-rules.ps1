@@ -1,6 +1,6 @@
 # =========================================================================
-# SCRIPT DE PRUEBAS AUTOMATIZADAS REST - API POLICIES & RISKS
-# Compatible con Windows PowerShell 5.1 y PowerShell 7+
+# AUTOMATED BUSINESS RULES TEST SCRIPT - POLICIES & RISKS API
+# Compatible with Windows PowerShell 5.1 and PowerShell 7+
 # =========================================================================
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -63,8 +63,8 @@ function Test-Endpoint {
                 $responseBody = $_.Exception.Message
             }
         } else {
-            Write-Host "ERROR DE CONEXION: No se pudo conectar a $baseUrl$Uri" -ForegroundColor Red
-            Write-Host "Asegurate de que la aplicacion este corriendo en otra terminal con '.\mvnw.bat spring-boot:run'." -ForegroundColor DarkYellow
+            Write-Host "CONNECTION ERROR: Could not reach $baseUrl$Uri" -ForegroundColor Red
+            Write-Host "Make sure the application is running in another terminal with '.\mvnw.bat spring-boot:run'." -ForegroundColor DarkYellow
             return
         }
     }
@@ -72,7 +72,7 @@ function Test-Endpoint {
     if ($statusCode -eq $CodigoEsperado) {
         Write-Host "PASS [HTTP $statusCode]" -ForegroundColor Green
     } else {
-        Write-Host "FALLO [HTTP $statusCode - Se esperaba: $CodigoEsperado]" -ForegroundColor Red
+        Write-Host "FAIL [HTTP $statusCode - Expected: $CodigoEsperado]" -ForegroundColor Red
     }
 
     if ($responseBody) {
@@ -86,60 +86,60 @@ function Test-Endpoint {
 }
 
 Write-Host "============================================================" -ForegroundColor Green
-Write-Host "   INICIANDO PRUEBAS INTERACTIVAS DE LA API (REST TESTS)   " -ForegroundColor Green
+Write-Host "   STARTING BUSINESS RULES TESTS (REST API)                 " -ForegroundColor Green
 Write-Host "============================================================" -ForegroundColor Green
 
-# 1. Seguridad: Sin header (espera 401)
-Test-Endpoint -Titulo "1. Validar Seguridad: Petición sin header x-api-key" `
+# 1. Security: Without API key (expect 401)
+Test-Endpoint -Titulo "1. Security: Request without x-api-key header" `
               -Metodo "GET" -Uri "/api/v1/policies" -HeadersCustom @{} -CodigoEsperado 401
 
-# 2. Listar todas las pólizas (espera 200)
-Test-Endpoint -Titulo "2. Listar todas las pólizas precargadas" `
+# 2. List all policies (expect 200)
+Test-Endpoint -Titulo "2. List all preloaded policies" `
               -Metodo "GET" -Uri "/api/v1/policies" -HeadersCustom $defaultHeaders -CodigoEsperado 200
 
-# 3. Filtrar por tipo y estado (espera 200)
-Test-Endpoint -Titulo "3. Filtrar pólizas individuales activas" `
+# 3. Filter by type and status (expect 200)
+Test-Endpoint -Titulo "3. Filter active individual policies" `
               -Metodo "GET" -Uri "/api/v1/policies?type=INDIVIDUAL&status=ACTIVE" -HeadersCustom $defaultHeaders -CodigoEsperado 200
 
-# 4. Consultar riesgos de Póliza 1 (espera 200)
-Test-Endpoint -Titulo "4. Consultar riesgos de la Póliza 1 (Individual)" `
+# 4. List risks of Policy 1 (expect 200)
+Test-Endpoint -Titulo "4. List risks of Policy 1 (Individual)" `
               -Metodo "GET" -Uri "/api/v1/policies/1/risks" -HeadersCustom $defaultHeaders -CodigoEsperado 200
 
-# 5. Renovar póliza vigente con IPC (espera 200)
-Test-Endpoint -Titulo "5. Renovar Póliza 1 con IPC del 5.10%" `
+# 5. Renew active policy with IPC (expect 200)
+Test-Endpoint -Titulo "5. Renew Policy 1 with 5.10% IPC" `
               -Metodo "POST" -Uri "/api/v1/policies/1/renew" -HeadersCustom $defaultHeaders `
               -Body '{"ipc": 5.10}' -CodigoEsperado 200
 
-# 6. Regla de Negocio: Renovar cancelada (espera 422)
-Test-Endpoint -Titulo "6. Regla de Negocio: Renovar Póliza 3 CANCELADA (Debe rechazar con 422)" `
+# 6. Business rule: Renew cancelled policy (expect 422)
+Test-Endpoint -Titulo "6. Business Rule: Renew CANCELLED Policy 3 (must reject with 422)" `
               -Metodo "POST" -Uri "/api/v1/policies/3/renew" -HeadersCustom $defaultHeaders `
               -Body '{"ipc": 5.10}' -CodigoEsperado 422
 
-# 7. Regla de Negocio: Agregar riesgo a individual (espera 422)
-Test-Endpoint -Titulo "7. Regla de Negocio: Agregar riesgo a Póliza 1 INDIVIDUAL (Debe rechazar con 422)" `
+# 7. Business rule: Add risk to individual policy (expect 422)
+Test-Endpoint -Titulo "7. Business Rule: Add risk to INDIVIDUAL Policy 1 (must reject with 422)" `
               -Metodo "POST" -Uri "/api/v1/policies/1/risks" -HeadersCustom $defaultHeaders `
-              -Body '{"propertyAddress":"Calle 10 # 20-30","city":"Bogota","insuredName":"Inquilino Rechazado","insuredAmount":1500000.00}' `
+              -Body '{"propertyAddress":"Calle 10 # 20-30","city":"Bogota","insuredName":"Rejected Tenant","insuredAmount":1500000.00}' `
               -CodigoEsperado 422
 
-# 8. Agregar riesgo a colectiva (espera 201)
-Test-Endpoint -Titulo "8. Agregar riesgo a Póliza 2 COLECTIVA (Debe ser exitoso con 201)" `
+# 8. Add risk to collective policy (expect 201)
+Test-Endpoint -Titulo "8. Add risk to COLLECTIVE Policy 2 (must succeed with 201)" `
               -Metodo "POST" -Uri "/api/v1/policies/2/risks" -HeadersCustom $defaultHeaders `
-              -Body '{"propertyAddress":"Carrera 15 # 85-30 Of 501","city":"Bogota","insuredName":"Nuevo Arrendatario SAS","insuredAmount":3500000.00}' `
+              -Body '{"propertyAddress":"Carrera 15 # 85-30 Of 501","city":"Bogota","insuredName":"New Tenant SAS","insuredAmount":3500000.00}' `
               -CodigoEsperado 201
 
-# 9. Cancelar un riesgo (espera 200)
-Test-Endpoint -Titulo "9. Cancelar individualmente Riesgo 2" `
+# 9. Cancel individual risk (expect 200)
+Test-Endpoint -Titulo "9. Cancel Risk 2 individually" `
               -Metodo "POST" -Uri "/api/v1/risks/2/cancel" -HeadersCustom $defaultHeaders -CodigoEsperado 200
 
-# 10. Cancelar póliza completa en cascada (espera 200)
-Test-Endpoint -Titulo "10. Regla de Negocio: Cancelar Póliza 2 y verificar cascada" `
+# 10. Cancel policy with cascade (expect 200)
+Test-Endpoint -Titulo "10. Business Rule: Cancel Policy 2 and verify cascade" `
               -Metodo "POST" -Uri "/api/v1/policies/2/cancel" -HeadersCustom $defaultHeaders -CodigoEsperado 200
 
-# 11. Mock CORE (espera 200)
-Test-Endpoint -Titulo "11. Enviar evento al Mock del CORE asegurador WebLogic" `
-              -Metodo "POST" -Uri "/core-mock/event" -HeadersCustom $defaultHeaders `
+# 11. Mock CORE (expect 200)
+Test-Endpoint -Titulo "11. Send event to CORE mock (WebLogic)" `
+              -Metodo "POST" -Uri "/api/v1/core-mock/event" -HeadersCustom $defaultHeaders `
               -Body '{"event":"MANUAL_TEST","policyId":999}' -CodigoEsperado 200
 
 Write-Host "`n============================================================" -ForegroundColor Green
-Write-Host "           TODAS LAS PRUEBAS HAN FINALIZADO                 " -ForegroundColor Green
+Write-Host "           ALL BUSINESS RULES TESTS COMPLETED               " -ForegroundColor Green
 Write-Host "============================================================" -ForegroundColor Green

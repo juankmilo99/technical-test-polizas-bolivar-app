@@ -19,7 +19,7 @@ class CorrelationIdFilterTest {
     @Test
     @DisplayName("Genera un Correlation ID nuevo cuando el request no lo envía")
     void testGeneraNuevoCorrelationId() throws ServletException, IOException {
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/polizas");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/policies");
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();
 
@@ -34,7 +34,7 @@ class CorrelationIdFilterTest {
     @DisplayName("Preserva el Correlation ID enviado por el cliente en el header X-Correlation-Id")
     void testPreservaCorrelationIdExistente() throws ServletException, IOException {
         String existingId = "trace-abc-123-xyz";
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/polizas");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/policies");
         request.addHeader(CorrelationIdFilter.CORRELATION_ID_HEADER, existingId);
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();

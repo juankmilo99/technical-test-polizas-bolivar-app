@@ -29,7 +29,7 @@ class ApiKeyFilterTest {
     @Test
     @DisplayName("Petición sin header x-api-key es rechazada con 401 Unauthorized y JSON descriptivo")
     void testFaltaApiKeyRetorna401() throws ServletException, IOException {
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/polizas");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/policies");
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();
 
@@ -43,7 +43,7 @@ class ApiKeyFilterTest {
     @Test
     @DisplayName("Petición con header x-api-key erróneo es rechazada con 401 Unauthorized")
     void testApiKeyErroneoRetorna401() throws ServletException, IOException {
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/polizas");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/policies");
         request.addHeader("x-api-key", "clave-invalida");
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();
@@ -56,7 +56,7 @@ class ApiKeyFilterTest {
     @Test
     @DisplayName("Petición con header x-api-key válido 123456 continúa la cadena de filtros exitosamente")
     void testApiKeyValidoPermiteAcceso() throws ServletException, IOException {
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/polizas");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/policies");
         request.addHeader("x-api-key", "123456");
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();
@@ -82,7 +82,7 @@ class ApiKeyFilterTest {
         MockHttpServletRequest reqApiDocs = new MockHttpServletRequest("GET", "/v3/api-docs/swagger-config");
         assertTrue(filter.shouldNotFilter(reqApiDocs));
 
-        MockHttpServletRequest reqApi = new MockHttpServletRequest("GET", "/polizas/1/renovar");
+        MockHttpServletRequest reqApi = new MockHttpServletRequest("GET", "/api/v1/policies/1/renew");
         assertFalse(filter.shouldNotFilter(reqApi));
     }
 }

@@ -31,11 +31,11 @@ class CoreMockControllerTest {
     private static final String API_KEY_VALUE = "123456";
 
     @Test
-    @DisplayName("POST /core-mock/event with valid payload returns 200 and RECEIVED status")
+    @DisplayName("POST /api/v1/core-mock/event with valid payload returns 200 and RECEIVED status")
     void testReceiveEventSuccess() throws Exception {
         CoreEventRequest req = new CoreEventRequest("POLICY_UPDATE", 555L);
 
-        mockMvc.perform(post("/core-mock/event")
+        mockMvc.perform(post("/api/v1/core-mock/event")
                         .header(API_KEY_HEADER, API_KEY_VALUE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
@@ -46,11 +46,11 @@ class CoreMockControllerTest {
     }
 
     @Test
-    @DisplayName("POST /core-mock/event with missing fields returns 400 Bad Request")
+    @DisplayName("POST /api/v1/core-mock/event with missing fields returns 400 Bad Request")
     void testReceiveEventInvalidReturns400() throws Exception {
         CoreEventRequest req = new CoreEventRequest(null, null);
 
-        mockMvc.perform(post("/core-mock/event")
+        mockMvc.perform(post("/api/v1/core-mock/event")
                         .header(API_KEY_HEADER, API_KEY_VALUE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))

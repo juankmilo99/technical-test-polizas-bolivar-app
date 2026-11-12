@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Inbound REST controller adapter for direct Risk operations.
  */
 @RestController
-@RequestMapping({"/api/v1/risks", "/risks", "/api/v1/riesgos", "/riesgos"})
+@RequestMapping("/api/v1/risks")
 @Tag(name = "2. Risks", description = "Operations on individual property risks")
 public class RiskController {
 
@@ -33,7 +33,7 @@ public class RiskController {
             @ApiResponse(responseCode = "200", description = "Risk successfully cancelled"),
             @ApiResponse(responseCode = "404", description = "Risk not found")
     })
-    @PostMapping({"/{id}/cancel", "/{id}/cancelar"})
+    @PostMapping("/{id}/cancel")
     public ResponseEntity<RiskResponse> cancelRisk(@PathVariable Long id) {
         Risk cancelled = riskCommandHandler.cancelRisk(new CancelRiskCommand(id));
         return ResponseEntity.ok(RiskResponse.fromEntity(cancelled));
