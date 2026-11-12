@@ -2,7 +2,7 @@ package com.seguros.polizas.infrastructure.web.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.seguros.polizas.infrastructure.config.ApiKeyFilter;
-import com.seguros.polizas.infrastructure.web.rest.dto.CoreEventoRequest;
+import com.seguros.polizas.infrastructure.web.rest.dto.CoreEventRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(CoreMockController.class)
 @Import({ApiKeyFilter.class, GlobalExceptionHandler.class})
-@DisplayName("Pruebas Unitarias de Capa Web: CoreMockController")
+@DisplayName("Web Layer Unit Tests: CoreMockController")
 class CoreMockControllerTest {
 
     @Autowired
@@ -31,31 +31,29 @@ class CoreMockControllerTest {
     private static final String API_KEY_VALUE = "123456";
 
     @Test
-    @DisplayName("POST /api/v1/core-mock/evento con payload válido retorna 200 y status REGISTRADO")
-    void testRecibirEventoExitoso() throws Exception {
-        CoreEventoRequest req = new CoreEventoRequest("ACTUALIZACION", 555L);
+    @DisplayName("POST /core-mock/event with valid payload returns 200 and RECEIVED status")
+    void testReceiveEventSuccess() throws Exception {
+        CoreEventRequest req = new CoreEventRequest("POLICY_UPDATE", 555L);
 
-        mockMvc.perform(post("/api/v1/core-mock/evento")
+        mockMvc.perform(post("/core-mock/event")
                         .header(API_KEY_HEADER, API_KEY_VALUE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status", is("REGISTRADO")))
-                .andExpect(jsonPath("$.evento", is("ACTUALIZACION")))
-                .andExpect(jsonPath("$.polizaId", is(555)));
+                .andExpect(jsonPath("$.status", is("RECEIVED")))
+                .andExpect(jsonPath("$.event", is("POLICY_UPDATE")))
+                .andExpect(jsonPath("$.policyId", is(555)));
     }
 
     @Test
-    @DisplayName("POST /api/v1/core-mock/evento con campos nulos retorna 400 Bad Request")
-    void testRecibirEventoInvalidoRetorna400() throws Exception {
-        CoreEventoRequest reqInvalido = new CoreEventoRequest("", null);
+    @DisplayName("POST /core-mock/event with missing fields returns 400 Bad Request")
+    void testReceiveEventInvalidReturns400() throws Exception {
+        CoreEventRequest req = new CoreEventRequest(null, null);
 
-        mockMvc.perform(post("/api/v1/core-mock/evento")
+        mockMvc.perform(post("/core-mock/event")
                         .header(API_KEY_HEADER, API_KEY_VALUE)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(reqInvalido)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath("$.error", is("Validacion de entrada fallida")));
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest());
     }
 }

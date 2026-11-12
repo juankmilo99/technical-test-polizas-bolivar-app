@@ -1,0 +1,15 @@
+# Archivos creados por docker durante la construcción
+*.jar
+!target/*.jar
+
+### Terraform ###
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+.terraform.lock.hcl

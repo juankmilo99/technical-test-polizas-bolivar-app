@@ -1,6 +1,6 @@
 package com.seguros.polizas.infrastructure.integration;
 
-import com.seguros.polizas.infrastructure.web.rest.dto.CoreEventoRequest;
+import com.seguros.polizas.infrastructure.web.rest.dto.CoreEventRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,12 +11,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Adaptador (outbound) Anti-Corruption Layer hacia el CORE asegurador legado.
+ * Outbound Anti-Corruption Layer (ACL) adapter connecting to the legacy insurance CORE.
  *
- * <p>Traduce las operaciones del dominio al contrato del sistema legado y
- * encapsula la comunicación HTTP. Si el CORE no responde, el error se registra
- * sin hacer fallar la transacción principal (en producción iría a una cola de
- * reintentos / DLQ).</p>
+ * <p>Translates modern domain events into legacy contracts and manages HTTP communication.
+ * If the legacy system is unavailable, failures are gracefully handled and logged without
+ * breaking the local transaction.</p>
  */
 @Component
 public class CoreIntegrationAdapter implements CoreIntegrationPort {
@@ -29,7 +28,7 @@ public class CoreIntegrationAdapter implements CoreIntegrationPort {
     private final String apiKeyValue;
 
     public CoreIntegrationAdapter(RestTemplate restTemplate,
-                                  @Value("${app.core.mock-url:http://localhost:8080/api/v1/core-mock/evento}") String mockUrl,
+                                  @Value("${app.core.mock-url:http://localhost:8080/api/v1/core-mock/event}") String mockUrl,
                                   @Value("${app.security.api-key-header:x-api-key}") String apiKeyHeader,
                                   @Value("${app.security.api-key-value:123456}") String apiKeyValue) {
         this.restTemplate = restTemplate;
@@ -39,24 +38,24 @@ public class CoreIntegrationAdapter implements CoreIntegrationPort {
     }
 
     @Override
-    public void notificarEvento(String tipoEvento, Long polizaId) {
-        CoreEventoRequest request = new CoreEventoRequest(tipoEvento, polizaId);
+    public void notifyEvent(String eventType, Long policyId) {
+        CoreEventRequest request = new CoreEventRequest(eventType, policyId);
 
-        log.info("[CORE-ACL] >> Intentando enviar evento al CORE legado WebLogic: evento='{}', polizaId={}",
-                tipoEvento, polizaId);
+        log.info("[CORE-ACL] >> Dispatching business event to legacy WebLogic CORE: event='{}', policyId={}",
+                eventType, policyId);
 
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set(apiKeyHeader, apiKeyValue);
 
-            HttpEntity<CoreEventoRequest> entity = new HttpEntity<>(request, headers);
+            HttpEntity<CoreEventRequest> entity = new HttpEntity<>(request, headers);
             restTemplate.postForObject(mockUrl, entity, String.class);
 
-            log.info("[CORE-ACL] << Confirmacion recibida con exito del servicio CORE para polizaId={}", polizaId);
+            log.info("[CORE-ACL] << Confirmation successfully received from CORE service for policyId={}", policyId);
         } catch (Exception ex) {
-            log.warn("[CORE-ACL] !! Intento de envio al CORE registrado para polizaId={}, evento='{}'. Motivo: {}",
-                    polizaId, tipoEvento, ex.getMessage());
+            log.warn("[CORE-ACL] !! Graceful degradation: Event logged for policyId={}, event='{}'. Reason: {}",
+                    policyId, eventType, ex.getMessage());
         }
     }
 }

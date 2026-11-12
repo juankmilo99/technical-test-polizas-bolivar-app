@@ -1,5 +1,5 @@
-# =========================================================================
-# SCRIPT DE PRUEBAS AUTOMATIZADAS REST - API POLIZAS
+﻿# =========================================================================
+# SCRIPT DE PRUEBAS AUTOMATIZADAS REST - API POLICIES & RISKS
 # Compatible con Windows PowerShell 5.1 y PowerShell 7+
 # =========================================================================
 
@@ -86,59 +86,59 @@ function Test-Endpoint {
 }
 
 Write-Host "============================================================" -ForegroundColor Green
-Write-Host "   INICIANDO PRUEBAS INTERACTIVAS DE LA API DE POLIZAS     " -ForegroundColor Green
+Write-Host "   INICIANDO PRUEBAS INTERACTIVAS DE LA API (REST TESTS)   " -ForegroundColor Green
 Write-Host "============================================================" -ForegroundColor Green
 
 # 1. Seguridad: Sin header (espera 401)
 Test-Endpoint -Titulo "1. Validar Seguridad: Petición sin header x-api-key" `
-              -Metodo "GET" -Uri "/api/v1/polizas" -HeadersCustom @{} -CodigoEsperado 401
+              -Metodo "GET" -Uri "/api/v1/policies" -HeadersCustom @{} -CodigoEsperado 401
 
 # 2. Listar todas las pólizas (espera 200)
 Test-Endpoint -Titulo "2. Listar todas las pólizas precargadas" `
-              -Metodo "GET" -Uri "/api/v1/polizas" -HeadersCustom $defaultHeaders -CodigoEsperado 200
+              -Metodo "GET" -Uri "/api/v1/policies" -HeadersCustom $defaultHeaders -CodigoEsperado 200
 
 # 3. Filtrar por tipo y estado (espera 200)
-Test-Endpoint -Titulo "3. Filtrar pólizas individuales vigentes" `
-              -Metodo "GET" -Uri "/api/v1/polizas?tipo=INDIVIDUAL&estado=VIGENTE" -HeadersCustom $defaultHeaders -CodigoEsperado 200
+Test-Endpoint -Titulo "3. Filtrar pólizas individuales activas" `
+              -Metodo "GET" -Uri "/api/v1/policies?type=INDIVIDUAL&status=ACTIVE" -HeadersCustom $defaultHeaders -CodigoEsperado 200
 
 # 4. Consultar riesgos de Póliza 1 (espera 200)
 Test-Endpoint -Titulo "4. Consultar riesgos de la Póliza 1 (Individual)" `
-              -Metodo "GET" -Uri "/api/v1/polizas/1/riesgos" -HeadersCustom $defaultHeaders -CodigoEsperado 200
+              -Metodo "GET" -Uri "/api/v1/policies/1/risks" -HeadersCustom $defaultHeaders -CodigoEsperado 200
 
 # 5. Renovar póliza vigente con IPC (espera 200)
 Test-Endpoint -Titulo "5. Renovar Póliza 1 con IPC del 5.10%" `
-              -Metodo "POST" -Uri "/api/v1/polizas/1/renovar" -HeadersCustom $defaultHeaders `
+              -Metodo "POST" -Uri "/api/v1/policies/1/renew" -HeadersCustom $defaultHeaders `
               -Body '{"ipc": 5.10}' -CodigoEsperado 200
 
 # 6. Regla de Negocio: Renovar cancelada (espera 422)
 Test-Endpoint -Titulo "6. Regla de Negocio: Renovar Póliza 3 CANCELADA (Debe rechazar con 422)" `
-              -Metodo "POST" -Uri "/api/v1/polizas/3/renovar" -HeadersCustom $defaultHeaders `
+              -Metodo "POST" -Uri "/api/v1/policies/3/renew" -HeadersCustom $defaultHeaders `
               -Body '{"ipc": 5.10}' -CodigoEsperado 422
 
 # 7. Regla de Negocio: Agregar riesgo a individual (espera 422)
 Test-Endpoint -Titulo "7. Regla de Negocio: Agregar riesgo a Póliza 1 INDIVIDUAL (Debe rechazar con 422)" `
-              -Metodo "POST" -Uri "/api/v1/polizas/1/riesgos" -HeadersCustom $defaultHeaders `
-              -Body '{"direccionInmueble":"Calle 10 # 20-30","ciudad":"Bogota","nombreAsegurado":"Inquilino Rechazado","valorAsegurado":1500000.00}' `
+              -Metodo "POST" -Uri "/api/v1/policies/1/risks" -HeadersCustom $defaultHeaders `
+              -Body '{"propertyAddress":"Calle 10 # 20-30","city":"Bogota","insuredName":"Inquilino Rechazado","insuredAmount":1500000.00}' `
               -CodigoEsperado 422
 
 # 8. Agregar riesgo a colectiva (espera 201)
 Test-Endpoint -Titulo "8. Agregar riesgo a Póliza 2 COLECTIVA (Debe ser exitoso con 201)" `
-              -Metodo "POST" -Uri "/api/v1/polizas/2/riesgos" -HeadersCustom $defaultHeaders `
-              -Body '{"direccionInmueble":"Carrera 15 # 85-30 Of 501","ciudad":"Bogota","nombreAsegurado":"Nuevo Arrendatario SAS","valorAsegurado":3500000.00}' `
+              -Metodo "POST" -Uri "/api/v1/policies/2/risks" -HeadersCustom $defaultHeaders `
+              -Body '{"propertyAddress":"Carrera 15 # 85-30 Of 501","city":"Bogota","insuredName":"Nuevo Arrendatario SAS","insuredAmount":3500000.00}' `
               -CodigoEsperado 201
 
 # 9. Cancelar un riesgo (espera 200)
 Test-Endpoint -Titulo "9. Cancelar individualmente Riesgo 2" `
-              -Metodo "POST" -Uri "/api/v1/riesgos/2/cancelar" -HeadersCustom $defaultHeaders -CodigoEsperado 200
+              -Metodo "POST" -Uri "/api/v1/risks/2/cancel" -HeadersCustom $defaultHeaders -CodigoEsperado 200
 
 # 10. Cancelar póliza completa en cascada (espera 200)
 Test-Endpoint -Titulo "10. Regla de Negocio: Cancelar Póliza 2 y verificar cascada" `
-              -Metodo "POST" -Uri "/api/v1/polizas/2/cancelar" -HeadersCustom $defaultHeaders -CodigoEsperado 200
+              -Metodo "POST" -Uri "/api/v1/policies/2/cancel" -HeadersCustom $defaultHeaders -CodigoEsperado 200
 
 # 11. Mock CORE (espera 200)
 Test-Endpoint -Titulo "11. Enviar evento al Mock del CORE asegurador WebLogic" `
-              -Metodo "POST" -Uri "/api/v1/core-mock/evento" -HeadersCustom $defaultHeaders `
-              -Body '{"evento":"PRUEBA_MANUAL","polizaId":999}' -CodigoEsperado 200
+              -Metodo "POST" -Uri "/core-mock/event" -HeadersCustom $defaultHeaders `
+              -Body '{"event":"MANUAL_TEST","policyId":999}' -CodigoEsperado 200
 
 Write-Host "`n============================================================" -ForegroundColor Green
 Write-Host "           TODAS LAS PRUEBAS HAN FINALIZADO                 " -ForegroundColor Green

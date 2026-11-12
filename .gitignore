@@ -3,6 +3,21 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Terraform ###
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+.terraform.lock.hcl
+
+### Jacoco / Coverage ###
+**/site/jacoco/
+
 ### STS ###
 .apt_generated
 .classpath
@@ -35,3 +50,4 @@ build/
 *.log
 .DS_Store
 Thumbs.db
+

@@ -7,13 +7,10 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
- * Consumidor interno de eventos de dominio.
+ * Internal domain event consumer.
  *
- * <p>Representa el lado "event-driven" de la arquitectura: los eventos que
- * publica el dominio (tras confirmarse la transacción) se consumen aquí para
- * orquestar efectos secundarios. Actualmente reenvía al CORE legado a través
- * del ACL; es el punto natural para añadir notificaciones, auditoría o
- * proyecciones de lectura (CQRS read model).</p>
+ * <p>Implements Event-Driven Architecture: domain events emitted after a successful
+ * database commit are consumed here to trigger asynchronous and integration side-effects.</p>
  */
 @Component
 public class CoreEventRelay {
@@ -26,6 +23,6 @@ public class CoreEventRelay {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onDomainEvent(DomainEvent event) {
-        coreIntegrationPort.notificarEvento(event.eventType(), event.aggregateId());
+        coreIntegrationPort.notifyEvent(event.eventType(), event.aggregateId());
     }
 }
