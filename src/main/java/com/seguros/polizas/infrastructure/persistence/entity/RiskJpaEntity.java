@@ -148,3 +148,4 @@ public class RiskJpaEntity {
         this.cancellationDate = cancellationDate;
     }
 }
+

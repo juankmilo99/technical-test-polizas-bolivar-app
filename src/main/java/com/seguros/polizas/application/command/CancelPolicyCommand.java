@@ -7,3 +7,4 @@ public record CancelPolicyCommand(
         Long policyId
 ) {
 }
+

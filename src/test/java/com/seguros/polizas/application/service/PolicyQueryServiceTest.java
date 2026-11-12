@@ -101,3 +101,4 @@ class PolicyQueryServiceTest {
         assertEquals(1, risks.size());
     }
 }
+

@@ -141,3 +141,4 @@ public class PolicyRequest {
     public RiskRequest getRiesgoInicial() { return initialRisk; }
     public void setRiesgoInicial(RiskRequest r) { this.initialRisk = r; }
 }
+

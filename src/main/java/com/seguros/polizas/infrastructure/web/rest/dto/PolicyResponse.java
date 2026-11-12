@@ -182,3 +182,4 @@ public class PolicyResponse {
     public int getCantidadRiesgos() { return riskCount; }
     public List<RiskResponse> getRiesgos() { return risks; }
 }
+

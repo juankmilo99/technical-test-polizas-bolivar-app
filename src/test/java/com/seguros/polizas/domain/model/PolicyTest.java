@@ -113,3 +113,4 @@ class PolicyTest {
         assertSame(policy, risk.getPolicy());
     }
 }
+

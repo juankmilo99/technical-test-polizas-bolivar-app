@@ -61,3 +61,4 @@ public class RiskRepositoryAdapter implements RiskRepository {
                 .collect(Collectors.toList());
     }
 }
+

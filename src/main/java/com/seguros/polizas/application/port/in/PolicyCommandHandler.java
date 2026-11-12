@@ -16,3 +16,4 @@ public interface PolicyCommandHandler {
 
     Policy cancel(CancelPolicyCommand command);
 }
+

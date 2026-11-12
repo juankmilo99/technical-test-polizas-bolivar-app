@@ -61,3 +61,4 @@ class PolicyJpaRepositoryTest {
         assertFalse(policyJpaRepository.existsByPolicyNumber("POL-NOT-EXIST"));
     }
 }
+

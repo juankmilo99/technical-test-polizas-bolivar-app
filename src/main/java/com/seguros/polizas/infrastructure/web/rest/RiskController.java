@@ -39,3 +39,4 @@ public class RiskController {
         return ResponseEntity.ok(RiskResponse.fromEntity(cancelled));
     }
 }
+

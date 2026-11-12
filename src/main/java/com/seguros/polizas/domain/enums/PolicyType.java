@@ -22,3 +22,4 @@ public enum PolicyType {
         throw new IllegalArgumentException("Unknown PolicyType: " + value);
     }
 }
+

@@ -72,3 +72,4 @@ class RiskJpaRepositoryTest {
         assertEquals("Address 1", risksPolicy1.get(0).getPropertyAddress());
     }
 }
+

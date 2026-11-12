@@ -119,3 +119,4 @@ public class RiskResponse {
     public LocalDate getFechaInclusion() { return inclusionDate; }
     public LocalDate getFechaCancelacion() { return cancellationDate; }
 }
+

@@ -168,3 +168,4 @@ public class PolicyController {
         return ResponseEntity.status(HttpStatus.CREATED).body(RiskResponse.fromEntity(savedRisk));
     }
 }
+

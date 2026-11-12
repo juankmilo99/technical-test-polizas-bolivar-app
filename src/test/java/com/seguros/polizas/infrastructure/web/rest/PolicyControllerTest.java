@@ -144,3 +144,4 @@ class PolicyControllerTest {
                 .andExpect(jsonPath("$.error", is("BUSINESS_RULE_VIOLATION")));
     }
 }
+

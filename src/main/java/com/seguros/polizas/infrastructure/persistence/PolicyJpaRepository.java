@@ -19,3 +19,4 @@ public interface PolicyJpaRepository extends JpaRepository<PolicyJpaEntity, Long
 
     boolean existsByPolicyNumber(String policyNumber);
 }
+

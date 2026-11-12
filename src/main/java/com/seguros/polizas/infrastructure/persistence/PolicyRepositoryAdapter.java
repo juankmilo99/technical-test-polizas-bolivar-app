@@ -73,3 +73,4 @@ public class PolicyRepositoryAdapter implements PolicyRepository {
         jpaRepository.deleteById(id);
     }
 }
+

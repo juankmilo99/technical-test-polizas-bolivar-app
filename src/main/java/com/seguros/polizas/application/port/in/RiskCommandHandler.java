@@ -13,3 +13,4 @@ public interface RiskCommandHandler {
 
     Risk cancelRisk(CancelRiskCommand command);
 }
+

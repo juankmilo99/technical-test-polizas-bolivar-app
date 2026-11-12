@@ -18,3 +18,4 @@ public interface PolicyQuery {
 
     List<Risk> listRisks(Long policyId);
 }
+

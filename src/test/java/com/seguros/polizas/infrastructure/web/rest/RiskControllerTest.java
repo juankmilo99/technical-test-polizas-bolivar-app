@@ -63,3 +63,4 @@ class RiskControllerTest {
                 .andExpect(jsonPath("$.error", is("NOT_FOUND")));
     }
 }
+

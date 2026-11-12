@@ -78,3 +78,4 @@ public class RiskRequest {
     public BigDecimal getValorAsegurado() { return insuredAmount; }
     public void setValorAsegurado(BigDecimal v) { this.insuredAmount = v; }
 }
+

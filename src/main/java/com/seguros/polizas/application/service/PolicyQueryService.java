@@ -55,3 +55,4 @@ public class PolicyQueryService implements PolicyQuery {
         return riskRepository.findByPolicyId(policyId);
     }
 }
+

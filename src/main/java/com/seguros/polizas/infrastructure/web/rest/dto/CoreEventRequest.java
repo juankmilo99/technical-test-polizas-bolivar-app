@@ -58,3 +58,4 @@ public class CoreEventRequest {
         this.policyId = polizaId;
     }
 }
+

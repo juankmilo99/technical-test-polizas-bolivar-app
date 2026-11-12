@@ -140,3 +140,4 @@ class PolicyLifecycleIntegrationTest {
                 .andExpect(jsonPath("$.status", is(422)));
     }
 }
+

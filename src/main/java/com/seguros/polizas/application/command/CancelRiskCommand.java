@@ -7,3 +7,4 @@ public record CancelRiskCommand(
         Long riskId
 ) {
 }
+

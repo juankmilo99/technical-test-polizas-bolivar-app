@@ -120,3 +120,4 @@ class RiskCommandServiceTest {
         verify(eventPublisher, times(1)).publish(any(DomainEvent.class));
     }
 }
+

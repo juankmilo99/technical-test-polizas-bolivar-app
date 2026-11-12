@@ -118,3 +118,4 @@ public class PolicyCommandService implements PolicyCommandHandler {
         eventPublisher.publish(event);
     }
 }
+

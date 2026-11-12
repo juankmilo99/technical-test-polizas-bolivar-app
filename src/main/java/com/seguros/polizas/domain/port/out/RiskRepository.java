@@ -16,3 +16,4 @@ public interface RiskRepository {
 
     List<Risk> findByPolicyId(Long policyId);
 }
+

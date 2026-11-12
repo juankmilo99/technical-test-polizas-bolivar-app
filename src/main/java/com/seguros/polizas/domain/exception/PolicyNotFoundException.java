@@ -13,3 +13,4 @@ public class PolicyNotFoundException extends DomainException {
         super("Policy not found with ID: " + policyId);
     }
 }
+

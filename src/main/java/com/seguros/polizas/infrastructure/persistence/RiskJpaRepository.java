@@ -11,3 +11,4 @@ public interface RiskJpaRepository extends JpaRepository<RiskJpaEntity, Long> {
 
     List<RiskJpaEntity> findByPolicyId(Long policyId);
 }
+
