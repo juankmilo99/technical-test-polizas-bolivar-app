@@ -1,0 +1,142 @@
+### =========================================================================
+### COLECCION DE PRUEBAS HTTP - API GESTION DE POLIZAS (MÓDULO 2)
+### Compatible con REST Client (VS Code), IntelliJ HTTP Client y Postman
+### =========================================================================
+
+@baseUrl = http://localhost:8080
+@apiKey = 123456
+
+### 1. Seguridad: Intento de acceso sin API Key (Debe retornar 401 Unauthorized)
+GET {{baseUrl}}/api/v1/polizas
+
+###
+
+### 2. Seguridad: Intento con API Key incorrecto (Debe retornar 401 Unauthorized)
+GET {{baseUrl}}/api/v1/polizas
+x-api-key: clave-invalida
+
+###
+
+### 3. Listar todas las pólizas precargadas (Debe retornar 200 OK con array de pólizas)
+GET {{baseUrl}}/api/v1/polizas
+x-api-key: {{apiKey}}
+
+###
+
+### 4. Filtrar pólizas por Tipo y Estado (Individuales Vigentes)
+GET {{baseUrl}}/api/v1/polizas?tipo=INDIVIDUAL&estado=VIGENTE
+x-api-key: {{apiKey}}
+
+###
+
+### 5. Consultar los riesgos asociados a la Póliza 1 (Individual)
+GET {{baseUrl}}/api/v1/polizas/1/riesgos
+x-api-key: {{apiKey}}
+
+###
+
+### 6. Consultar los riesgos asociados a la Póliza 2 (Colectiva)
+GET {{baseUrl}}/api/v1/polizas/2/riesgos
+x-api-key: {{apiKey}}
+
+###
+
+### 6B. Consultar Póliza 4 (Colectiva ya Renovada con 2 riesgos activos)
+GET {{baseUrl}}/api/v1/polizas/4
+x-api-key: {{apiKey}}
+
+###
+
+### 6C. Consultar Póliza 5 (Individual de 24 meses y canon $3.800.000)
+GET {{baseUrl}}/api/v1/polizas/5
+x-api-key: {{apiKey}}
+
+###
+
+### 6D. Consultar Póliza 6 (Colectiva Cancelada con riesgos cancelados)
+GET {{baseUrl}}/api/v1/polizas/6
+x-api-key: {{apiKey}}
+
+###
+
+### 7. Renovar Póliza 1 vigente aplicando IPC (+5.10%)
+# - Incrementa canon y prima
+# - Estado pasa a RENOVADA
+# - Dispara notificación al CORE
+POST {{baseUrl}}/api/v1/polizas/1/renovar
+x-api-key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "ipc": 5.10
+}
+
+###
+
+### 8. Regla de Negocio: Intentar renovar Póliza 3 CANCELADA (Debe retornar 422 Unprocessable Entity)
+POST {{baseUrl}}/api/v1/polizas/3/renovar
+x-api-key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "ipc": 5.10
+}
+
+###
+
+### 9. Regla de Negocio: Intentar agregar riesgo a Póliza 1 INDIVIDUAL (Debe retornar 422)
+POST {{baseUrl}}/api/v1/polizas/1/riesgos
+x-api-key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "direccionInmueble": "Carrera 15 # 90-10 Apt 402",
+  "ciudad": "Bogota",
+  "nombreAsegurado": "Inquilino No Permitido",
+  "valorAsegurado": 1500000.00
+}
+
+###
+
+### 10. Agregar Riesgo a Póliza 2 COLECTIVA (Debe retornar 201 Created)
+POST {{baseUrl}}/api/v1/polizas/2/riesgos
+x-api-key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "direccionInmueble": "Carrera 7 # 71-21 Torre A Of 801",
+  "ciudad": "Bogota",
+  "nombreAsegurado": "Nueva Empresa Arrendataria SAS",
+  "valorAsegurado": 3200000.00
+}
+
+###
+
+### 11. Cancelar un Riesgo individual (Riesgo ID 2)
+POST {{baseUrl}}/api/v1/riesgos/2/cancelar
+x-api-key: {{apiKey}}
+
+###
+
+### 12. Regla de Negocio: Cancelar Póliza 2 (Debe cancelar la póliza y TODOS sus riesgos en cascada)
+POST {{baseUrl}}/api/v1/polizas/2/cancelar
+x-api-key: {{apiKey}}
+
+###
+
+### 13. Verificar que los riesgos de la Póliza 2 quedaron en CANCELADO tras la cascada
+GET {{baseUrl}}/api/v1/polizas/2/riesgos
+x-api-key: {{apiKey}}
+
+###
+
+### 14. Mock externo CORE: Registrar evento en logs del sistema legado
+POST {{baseUrl}}/api/v1/core-mock/evento
+x-api-key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "evento": "ACTUALIZACION_MANUAL",
+  "polizaId": 555
+}
+
