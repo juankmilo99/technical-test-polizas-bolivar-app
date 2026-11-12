@@ -1,36 +1,34 @@
 # =============================================================
-# Etapa 1: Build (compila y ejecuta test + coverage con Maven)
+# Etapa 1: Build (compila con Maven oficial en JDK 21)
 # =============================================================
 FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
-# Copia el POM y descarga dependencias (cache layer)
+# Copia el POM y descarga dependencias (cache layer de Docker)
 COPY pom.xml ./
-COPY .mvn .mvn
-COPY mvnw ./
 RUN mvn -B dependency:go-offline
 
-# Copia el código fuente y compila el jar
+# Copia el código fuente y genera el jar de producción
 COPY src ./src
 RUN mvn -B clean package -DskipTests
 
 # =============================================================
-# Etapa 2: Runtime (imagen minimal con JRE)
+# Etapa 2: Runtime (imagen minimal ligera con JRE 21)
 # =============================================================
 FROM eclipse-temurin:21-jre-alpine AS runtime
 WORKDIR /app
 
-# Usuario no root por seguridad
+# Usuario no root por buenas prácticas de seguridad
 RUN addgroup -S app && adduser -S app -G app
 USER app
 
-# Expone el puerto de la aplicación
+# Expone el puerto por defecto de la aplicación
 EXPOSE 8080
 
-# Copia el jar generado
+# Copia el artefacto compilado desde la etapa de build
 COPY --from=build /app/target/*.jar app.jar
 
-# Healthcheck usando el endpoint de Actuator
+# Healthcheck continuo usando Spring Boot Actuator
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
     CMD wget -qO- http://localhost:8080/actuator/health || exit 1
 
