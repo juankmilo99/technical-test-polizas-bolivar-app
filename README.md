@@ -80,7 +80,9 @@ Las acciones sobre el dominio **no acoplan** servicios de forma síncrona. Cada 
 | `RiskAddedEvent` | Al incluir un riesgo en una colectiva. |
 | `RiskCancelledEvent` | Al cancelar un riesgo individual. |
 
-El agregado `Policy` acumula los eventos (`drainEvents()`), y estos se publican **después del commit** de la transacción (`@TransactionalEventListener(AFTER_COMMIT)`) a través del `CoreEventRelay`, que los reenvía al CORE. Si el legado falla, **no revierte la transacción principal** (en producción iría a una cola de reintentos / DLQ).
+El agregado `Policy` acumula los eventos (`drainEvents()`), y estos se publican a través del puerto `EventPublisher`. En el modo **autocontenido** (default) se publican con `SpringEventPublisher` (in-memory) y se consumen **después del commit** (`@TransactionalEventListener(AFTER_COMMIT)`) a través del `CoreEventRelay`. Si el legado falla, **no revierte la transacción principal**.
+
+> 🐰 **Event Bus real (opcional):** bajo el perfil `rabbit`, el mismo puerto `EventPublisher` lo implementa `RabbitEventPublisher`, que serializa cada evento a JSON y lo publica en un exchange de RabbitMQ. Un consumidor (`RabbitCoreEventListener`) lo recibe de la cola y lo reenvía al CORE. Ver sección [Mensajería con RabbitMQ](#-mensajería-con-rabbitmq).
 
 ### 3. CQRS (Command Query Responsibility Segregation)
 
@@ -338,7 +340,26 @@ docker run --rm -p 8080:8080 polizas-app
 
 La imagen es **multi-etapa**: compila con Maven + JDK 21 y ejecuta con un JRE Alpine mínimo (usuario no-root + healthcheck).
 
-### 9.4. Infraestructura como código (Terraform)
+### 9.4. Mensajería con RabbitMQ (Event Bus real)
+
+La arquitectura event-driven admite un **broker real** mediante el perfil `rabbit`. Por defecto el proyecto es autocontenido (eventos in-memory), pero puedes activar RabbitMQ sin tocar código:
+
+```bash
+# 1. Levantar RabbitMQ con Docker Compose (incluye consola web en :15672)
+docker compose up -d
+
+# 2. Ejecutar la app con el perfil rabbit
+.\mvnw.bat spring-boot:run -Dspring-boot.run.profiles=rabbit
+```
+
+Con el perfil activo:
+- `RabbitEventPublisher` publica cada evento de dominio como JSON en el exchange `seguros.polizas.events` (routing key = tipo de evento).
+- `RabbitCoreEventListener` consume la cola `seguros.polizas.events.queue` y reenvía el evento al CORE vía la ACL.
+- La consola de administración está disponible en http://localhost:15672 (guest/guest).
+
+Esto demuestra el mismo patrón hexagonal: **otro adaptador de salida** para el puerto `EventPublisher`, activable por configuración sin modificar el dominio.
+
+### 9.5. Infraestructura como código (Terraform)
 
 La carpeta [`terraform/`](terraform/) define en AWS un **ECS Fargate** listo para desplegar:
 

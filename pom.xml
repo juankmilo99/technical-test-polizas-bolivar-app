@@ -47,6 +47,13 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
+        <!-- Spring AMQP (RabbitMQ): Event Bus para arquitectura event-driven.
+             Se activa únicamente bajo el perfil 'rabbit' (opcional). -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+
         <!-- H2 In-Memory Database -->
         <dependency>
             <groupId>com.h2database</groupId>

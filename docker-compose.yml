@@ -1,0 +1,36 @@
+# =============================================================
+# Docker Compose — Infraestructura local para desarrollo
+#
+# Levanta RabbitMQ (con su consola de administración) para activar
+# el perfil "rabbit" de la aplicación y probar la integración
+# event-driven con un broker real.
+#
+# Uso:
+#   docker compose up -d
+#   .\mvnw.bat spring-boot:run -Dspring-boot.run.profiles=rabbit
+#
+# Postman/curl de pruebas:
+#   - Broker AMQP:     localhost:5672   (usuario/pass: guest/guest)
+#   - Management UI:   http://localhost:15672
+# =============================================================
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: polizas-rabbitmq
+    ports:
+      - "5672:5672"     # Puerto AMQP para la aplicación
+      - "15672:15672"   # Consola de administración web
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  rabbitmq_data:

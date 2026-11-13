@@ -1,6 +1,12 @@
 spring:
   application:
     name: polizas-app
+  autoconfigure:
+    # RabbitMQ se activa solo bajo el perfil 'rabbit' (ver application-rabbit.yml).
+    # Al excluir su auto-configuración por defecto, la app sigue 100% autocontenida
+    # (H2 + eventos in-memory) sin requerir un broker externo.
+    exclude:
+      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
   datasource:
     url: jdbc:h2:mem:polizasdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver

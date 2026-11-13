@@ -1,0 +1,27 @@
+# =============================================================
+# Perfil "rabbit" — Integración con RabbitMQ (Event Bus real)
+#
+# Activación:
+#   .\mvnw.bat spring-boot:run -Dspring-boot.run.profiles=rabbit
+#
+# Requiere un broker RabbitMQ corriendo. Se recomienda levantarlo
+# con docker-compose (ver docker-compose.yml en la raíz).
+# =============================================================
+
+spring:
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    listener:
+      simple:
+        acknowledge-mode: auto
+        prefetch: 10
+        default-requeue-rejected: true
+
+app:
+  messaging:
+    rabbit:
+      exchange: seguros.polizas.events
+      queue: seguros.polizas.events.queue
